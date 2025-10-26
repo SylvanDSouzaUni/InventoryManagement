@@ -1,12 +1,16 @@
-# menu_options.py — simple console menu wired to inventory_services (with stock prompts)
 from inventory_services import (
     add_item,
     list_items,
     remove_item,
     update_item,
+    decrease_stock,
+    increase_stock
 )
 
-def main_menu():
+from authentication import permission_checker
+
+#Initial Main Menu system which only grants access to actions permitted to the current user
+def main_menu(user):
     print("=== Welcome to the Inventory System ===")
     while True:
         print("\nChoose an option:")
@@ -14,16 +18,27 @@ def main_menu():
         print("2) Add item")
         print("3) Update item")
         print("4) Remove item")
+        print("5) Increase item stock")
+        print("6) Decrease item stock")
+
         print("0) Exit")
 
         choice = input("Enter your choice: ").strip()
 
-        #Print all items in inventory
+        #List items
         if choice == "1":
+            if not permission_checker(user, "list_items"):
+                print("You do not have permission to do this.")
+                continue
             print(list_items())
 
-        #Add item 
+        #Add items
         elif choice == "2":
+            #Check permissions
+            if not permission_checker(user, "add_item"):
+                print("You do not have permission to do this.")
+                continue
+            #Add item
             sku = input("SKU: ").strip()
             name = input("Name: ").strip()
             unit = input("Unit (default 'each'): ").strip() or "each"
@@ -31,8 +46,13 @@ def main_menu():
             stock = input("Current stock (default 0): ").strip() or "0"
             print(add_item(sku, name, unit, min_level, stock))
 
-        #Update item (all fields optional except SKU)
+        #Update items
         elif choice == "3":
+            #Check permissions
+            if not permission_checker(user, "update_item"):
+                print("You do not have permission to do this.")
+                continue
+            # Update item
             sku = input("SKU to update: ").strip()
             new_name = input("New name (blank = unchanged): ").strip() or None
             new_unit = input("New unit (blank = unchanged): ").strip() or None
@@ -42,10 +62,39 @@ def main_menu():
 
         #Remove items
         elif choice == "4":
+            #Check permissions
+            if not permission_checker(user, "remove_item"):
+                print("You do not have permission to do this.")
+                continue
+            #Remove item
             sku = input("SKU to remove: ").strip()
             print(remove_item(sku))
 
-        #Exit code
+        #Increase stock
+        elif choice == "5":
+            #Check permissions
+            if not permission_checker(user, "increase_stock"):
+                print("You do not have permission to do this.")
+                continue
+            #Increase the stock by desired amount
+            sku = input("SKU to increase: ").strip()
+            num = input("Number of stock to increase by: ").strip()
+            current_stock = input("Current stock (blank = unchanged): ").strip() or 0
+            print(increase_stock(sku, num, current_stock))
+
+        #Decrease stock
+        elif choice == "6":
+            #Check permissions
+            if not permission_checker(user, "decrease_stock"):
+                print("You do not have permission to do this.")
+                continue
+            #Decrease the stock by desired amount
+            sku = input("SKU to decrease: ").strip()
+            num = input("Number of stock to decrease by: ").strip()
+            current_stock = input("Current stock (blank = unchanged): ").strip() or 0
+            print(decrease_stock(sku, num, current_stock))
+
+        #Exit
         elif choice == "0":
             print("Exiting... Goodbye!")
             break
@@ -54,5 +103,3 @@ def main_menu():
         else:
             print("Invalid choice. Please try again.")
 
-if __name__ == "__main__":
-    main_menu()

@@ -1,3 +1,5 @@
+#_______VALIDATION______#
+
 #Reusable function to validate integer inputs
 def validation_for_integer_input(value, field):
     try:
@@ -11,7 +13,7 @@ def validation_for_integer_input(value, field):
         return ValueError(f"{field} must not be empty")
     return integer
 
-#Reusable function to validate inputs that must have a value
+#Reusable function to validate non-empty inputs
 def validation_for_non_empty_input(value, field):
     stripped_value = str(value).strip()
     if not stripped_value:
@@ -26,7 +28,11 @@ def validation_for_string_input(value, field):
         raise ValueError(f"'{field}' must not be empty")
     return value
 
-#Function to add item to inventory
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+#Add item to inventory table
+#Available to: ADMIN
 def add_item(sku, name, unit, min_level, stock):
     try:
         validation_for_non_empty_input(sku, "SKU")
@@ -36,12 +42,8 @@ def add_item(sku, name, unit, min_level, stock):
     except Exception as e:
         return f"Failed to add item. [ERROR: {e}] \n"
 
-
-#Function to list inventory
-def list_items():
-    return "Inventory currently empty"
-
-#Function to remove item from inventory
+#Remove item from inventory table
+#Available to: ADMIN
 def remove_item(sku):
     try:
         validation_for_non_empty_input(sku, "SKU")
@@ -49,12 +51,35 @@ def remove_item(sku):
     except Exception as e:
         return f'Failed to remove item. [ERROR: {e}] \n'
 
+#Update inventory table by reporting a decrease in stock of a certain item
+#Available to: ADMIN, ENGINEER
+def decrease_stock(sku, number, current_stock):
+    try:
+        validation_for_non_empty_input(sku, "SKU")
+        validation_for_integer_input(number, "NUMBER")
+        return f"Item successfully updated. SKU: {sku}, NEW STOCK NUMBER: {int(current_stock) - int(number)}"
+    except Exception as e:
+        return f"Failed to update item. [ERROR: {e}] \n"
 
-#Function to update item in inventory
+#Update inventory table by reporting an increase in stock of an item
+#Available to: ADMIN, WAREHOUSE
+def increase_stock(sku, number, current_stock):
+    try:
+        validation_for_non_empty_input(sku, "SKU")
+        validation_for_integer_input(number, "NUMBER")
+        return f"Item successfully updated. SKU: {sku}, NEW STOCK NUMBER: {int(current_stock) + int(number)}"
+    except Exception as e:
+        return f"Failed to update item. [ERROR: {e}] \n"
+
+#List items in the inventory table
+#Available to: ADMIN, WAREHOUSE, ENGINEER
+def list_items():
+    return "Inventory currently empty"
+
+#Update item in inventory table
+#Available to: ADMIN, ENGINEER, WAREHOUSE
 def update_item(sku, name = None, unit = None, min_stock = None, stock = None):
-
     errors = []
-
     try:
         validation_for_non_empty_input(sku, "SKU")
 
@@ -85,7 +110,7 @@ def update_item(sku, name = None, unit = None, min_stock = None, stock = None):
         if errors:
             raise ValueError("; ".join(errors))
 
-        return (f" Item successfuly updated."
+        return (f" Item successfully updated."
                 f" SKU: {sku}"
                 f" Name={name or '[UNCHANGED]'}"
                 f" Unit={unit or '[UNCHANGED]'}"

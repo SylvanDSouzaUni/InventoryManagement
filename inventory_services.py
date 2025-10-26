@@ -1,4 +1,4 @@
-"""Reusable function to validate integer inputs"""
+#Reusable function to validate integer inputs
 def validation_for_integer_input(value, field):
     try:
         integer = int(value)
@@ -11,12 +11,13 @@ def validation_for_integer_input(value, field):
         return ValueError(f"{field} must not be empty")
     return integer
 
-'''Reusable function to validate inputs that must have a value'''
+#Reusable function to validate inputs that must have a value
 def validation_for_non_empty_input(value, field):
     stripped_value = str(value).strip()
     if not stripped_value:
         raise ValueError(f"'{field}' must not be empty")
 
+#Reusable function to validate string inputs
 def validation_for_string_input(value, field):
     stripped_value = str(value).strip()
     if not stripped_value:
@@ -25,7 +26,7 @@ def validation_for_string_input(value, field):
         raise ValueError(f"'{field}' must not be empty")
     return value
 
-'''Function to add item to inventory'''
+#Function to add item to inventory
 def add_item(sku, name, unit, min_level, stock):
     try:
         validation_for_non_empty_input(sku, "SKU")
@@ -36,11 +37,11 @@ def add_item(sku, name, unit, min_level, stock):
         return f"Failed to add item. [ERROR: {e}] \n"
 
 
-'''Function to list inventory'''
+#Function to list inventory
 def list_items():
     return "Inventory currently empty"
 
-'''Function to remove item from inventory'''
+#Function to remove item from inventory
 def remove_item(sku):
     try:
         validation_for_non_empty_input(sku, "SKU")
@@ -49,7 +50,7 @@ def remove_item(sku):
         return f'Failed to remove item. [ERROR: {e}] \n'
 
 
-'''Function to update item in inventory'''
+#Function to update item in inventory
 def update_item(sku, name = None, unit = None, min_stock = None, stock = None):
 
     errors = []

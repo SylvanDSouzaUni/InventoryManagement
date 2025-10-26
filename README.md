@@ -1,8 +1,12 @@
-This is the first version of the Inventory Manager.
-It features the core functions of an inventory manager, without the functionality of a database. Hence calling these functions will simply return strings explaining the action it should undertake, without actually completing that action in any database.
-This version also features a simple main menu for users to run the program.
+Version 1.1
+This version presents basic login functionality.
+Users are prompted to log in with existing credentials to access the main menu. The main menu has been updated to only grant access to actions which are permitted to users depending on their access type.
+Login passwords are hashed with a complex hashing process to ensure security.
+Additionally, functions have been added to increase and decrease the stock of an item. This function is easier to use than update item, so it serves as a more convenient method of updating simply the stock of an item rather than all of its attributes.
 
-To run this version, you must directly execute the menu_options.py file.
-On the console you will be greeted with the menu, and options of functions to execute.
-You can choose to execute a function by inputting the number associated with the action you want to complete.
-You will then be prompted on any further inputs required for that action.
+
+When running this program, one admin account will be created as the first account.
+The credentials are mentioned in the console apon creation. They are as follows:
+Username: admin
+Password: admin123
+After logging in, the main menu will work as before. In the next version, the different roles will be introduced, allowing users to experiment with different access levels.

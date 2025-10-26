@@ -18,11 +18,12 @@ def main_menu():
 
         choice = input("Enter your choice: ").strip()
 
+        #Print all items in inventory
         if choice == "1":
             print(list_items())
 
+        #Add item 
         elif choice == "2":
-            # Add item (requires stock as this project tracks on-hand qty)
             sku = input("SKU: ").strip()
             name = input("Name: ").strip()
             unit = input("Unit (default 'each'): ").strip() or "each"
@@ -30,8 +31,8 @@ def main_menu():
             stock = input("Current stock (default 0): ").strip() or "0"
             print(add_item(sku, name, unit, min_level, stock))
 
+        #Update item (all fields optional except SKU)
         elif choice == "3":
-            # Update item (all fields optional except SKU)
             sku = input("SKU to update: ").strip()
             new_name = input("New name (blank = unchanged): ").strip() or None
             new_unit = input("New unit (blank = unchanged): ").strip() or None
@@ -39,14 +40,17 @@ def main_menu():
             new_stock = input("New stock (blank = unchanged): ").strip() or None
             print(update_item(sku, new_name, new_unit, new_min, new_stock))
 
+        #Remove items
         elif choice == "4":
             sku = input("SKU to remove: ").strip()
             print(remove_item(sku))
 
+        #Exit code
         elif choice == "0":
             print("Exiting... Goodbye!")
             break
 
+        #Failsafe
         else:
             print("Invalid choice. Please try again.")
 

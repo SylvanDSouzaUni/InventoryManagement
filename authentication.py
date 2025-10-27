@@ -1,4 +1,6 @@
 import hashlib, secrets
+from sqlite3 import IntegrityError
+
 from database_manager import get_connection
 
 #Available roles
@@ -6,7 +8,17 @@ ROLES = ('Admin', 'Engineer', 'Warehouse')
 
 #Structure to store actions that each role is permitted to do
 PERMISSIONS = {
-    'Admin':     {'list_items', 'add_item', 'update_item', 'remove_item', 'decrease_stock', 'increase_stock'},
+    'Admin':     {'list_items',
+                  'add_item',
+                  'update_item',
+                  'remove_item',
+                  'decrease_stock',
+                  'increase_stock',
+                  'manage_users',
+                  'list_user_information',
+                  'admin_actions'
+                  },
+
     'Engineer':  {'list_items', 'update_item', 'decrease_stock'},
     'Warehouse': {'list_items', 'update_item', 'increase_stock'},
 }
@@ -35,12 +47,31 @@ def check_password(password_attempt, stored):
 #Function to create a user and add it to user table in database
 def create_user(username, password, role):
     hashed_password = hash_password(password)
-    with get_connection() as connection:
-        connection.execute(
-            "INSERT INTO users (username, password_hash, role) VALUES (?,?,?)", (username.strip(), hashed_password, role)
-        )
+    normalised_username = username.lower().strip()
+    try:
+        with get_connection() as connection:
+            connection.execute(
+                "INSERT INTO users (username, password_hash, role) VALUES (?,?,?)", (normalised_username, hashed_password, role)
+            )
+        return True
+    except IntegrityError:
+        raise False
 
-#Funciton to create a starting account if no accounts exist already. This account will be admin.
+#Function to delete a user from the user table in database
+def delete_user(username):
+    normalised_username = username.lower().strip()
+    if not normalised_username:
+        raise ValueError("Invalid username. Username must not be empty.")
+    with get_connection() as connection:
+        cursor = connection.execute(
+            "DELETE FROM users WHERE username=?", (normalised_username,)
+        )
+    if cursor.rowcount is not None and cursor.rowcount > 0:
+        return True
+    else:
+        return False
+
+#Function to create a starting account if no accounts exist already. This account will be admin.
 def create_starting_admin():
     with get_connection() as connection:
         row = connection.execute("SELECT COUNT(*) AS count FROM users").fetchone()
@@ -50,7 +81,7 @@ def create_starting_admin():
 
 #Login functionality
 def login():
-    username = input("Username: ").strip()
+    username = input("Username: ").strip().lower()
     password = input("Password: ").strip()
     with get_connection() as conn:
         row = conn.execute(

@@ -1,3 +1,6 @@
+from authentication import (create_user, delete_user)
+from database_manager import get_connection
+
 #_______VALIDATION______#
 
 #Reusable function to validate integer inputs
@@ -25,7 +28,7 @@ def validation_for_string_input(value, field):
     if not stripped_value:
         raise ValueError(f"'{field}' must not be empty")
     if stripped_value.isdigit():
-        raise ValueError(f"'{field}' must not be empty")
+        raise ValueError(f"'{field}' must not be an integer")
     return value
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -51,12 +54,78 @@ def remove_item(sku):
     except Exception as e:
         return f'Failed to remove item. [ERROR: {e}] \n'
 
+#List all users user table
+#Available to: ADMIN
+def list_user_information():
+    try:
+        with get_connection() as connection:
+            rows = connection.execute(
+                f"SELECT * FROM users ORDER BY id"
+            ).fetchall()
+
+        if not rows:
+            return "[ERROR] No users found"
+
+        table = []
+        table.append("ID | USERNAME       | ROLE       | PASSWORD HASH")
+        table.append("-" * 132)
+        for row in rows:
+            table.append(f"{row['id']:2} | {row['username']:<14} | {row['role']:<10} | {row['password_hash']}")
+        print("\n".join(table))
+        input("\nPress ENTER to continue")
+
+    except Exception as e:
+        return f"Failed to list users: {e}"
+
+#Create a new user to add to the user table
+#Available to: Admin
+def create_new_user(username, password, role):
+    try:
+        validation_for_string_input(username, "USERNAME")
+        validation_for_string_input(password, "PASSWORD")
+        validation_for_string_input(role, "ROLE")
+
+        normalised_role_format = str(role).strip().title()
+
+        if normalised_role_format not in ('Admin', 'Engineer', 'Warehouse'):
+            return "[ERROR] You have provided an invalid role. Please choose from: Admin, Engineer, Warehouse"
+
+        created_user = create_user(username, password, normalised_role_format)
+
+        if created_user:
+            return f"[SUCCESS] User successfully created: {str(username).strip().lower()}, ({normalised_role_format})"
+        else:
+            return f"[ERROR] Failed to create user: Username already exists or invalid role"
+
+    except Exception as e:
+        return f"Failed to create user: {e}"
+
+#Delete a user from the user table
+#Available to: Admin
+def delete_existing_user (username):
+    try:
+        validation_for_string_input(username, "USERNAME")
+        confirmation = input(f"{username} is about to be deleted. Are you sure you want to continue? Reply 'Cancel' to exit or press enter to continue: ")
+        if confirmation.strip().lower() == "cancel":
+            print (f"Action cancelled. {username} has not been deleted.")
+            return
+
+        deleted_user = delete_user(username)
+        if deleted_user:
+            return f"[SUCCESS] User successfully deleted: {str(username).strip().lower()}"
+        else:
+            return f"[ERROR] Failed to delete user: {str(username).strip().lower()}. No such user exists."
+
+    except Exception as e:
+        return f"Failed to delete user: {e}"
+
 #Update inventory table by reporting a decrease in stock of a certain item
 #Available to: ADMIN, ENGINEER
 def decrease_stock(sku, number, current_stock):
     try:
         validation_for_non_empty_input(sku, "SKU")
         validation_for_integer_input(number, "NUMBER")
+        validation_for_integer_input(current_stock, "CURRENT_STOCK")
         return f"Item successfully updated. SKU: {sku}, NEW STOCK NUMBER: {int(current_stock) - int(number)}"
     except Exception as e:
         return f"Failed to update item. [ERROR: {e}] \n"
@@ -67,6 +136,7 @@ def increase_stock(sku, number, current_stock):
     try:
         validation_for_non_empty_input(sku, "SKU")
         validation_for_integer_input(number, "NUMBER")
+        validation_for_integer_input(current_stock, "CURRENT_STOCK")
         return f"Item successfully updated. SKU: {sku}, NEW STOCK NUMBER: {int(current_stock) + int(number)}"
     except Exception as e:
         return f"Failed to update item. [ERROR: {e}] \n"
@@ -119,6 +189,8 @@ def update_item(sku, name = None, unit = None, min_stock = None, stock = None):
                 )
     except Exception as e:
         return f"Failed to update item. [ERROR: {e}] \n"
+
+
 
 
 

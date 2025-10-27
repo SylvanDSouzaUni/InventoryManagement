@@ -5,11 +5,18 @@ from menu_options import main_menu
 def main_loop():
     create_schema()
     create_starting_admin()
-    print("PLEASE LOG IN WITH YOUR CREDENTIALS")
-    user = None
-    while not user:
-        user = login()
-    main_menu(user)
+
+    while True:
+        print("PLEASE LOG IN WITH YOUR CREDENTIALS")
+        user = None
+        while not user:
+            user = login()
+        current_status = main_menu(user)
+
+        if current_status == "logged out":
+            continue
+        elif current_status == "exit":
+            break
 
 if __name__ == "__main__":
     main_loop()

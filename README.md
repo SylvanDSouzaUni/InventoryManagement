@@ -13,8 +13,8 @@ As this is the final version of this project. A more comprehensive program use g
 
 To start the program, run main.py.
 Apon running main,py, the console will display a prompt to enter username. If this is the first time running the program on your device, a default admin account will be created for you. The credentials for this account are as follows:
-Username: Admin
-Password: Admin123
+(Username: Admin)
+(Password: Admin123)
 You can log in with these credentials.
 
 After logging in, You will be greeted with the main menu.

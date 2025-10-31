@@ -2,15 +2,6 @@ from database_manager import create_schema, get_connection
 from authentication import create_starting_admin, login, create_user
 from menu_options import main_menu
 
-with get_connection() as conn:
-    conn.executescript("""
-        DROP TABLE IF EXISTS users;
-        DROP TABLE IF EXISTS items;
-        DROP TABLE IF EXISTS requests;
-    """)
-
-create_schema()
-print("✅ Tables deleted and recreated.")
 
 def main_loop():
     create_schema()

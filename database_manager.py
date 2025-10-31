@@ -41,6 +41,16 @@ def create_schema():
                 requested_by text not null 
             );
                 
+            create table if not exists orders (
+                order_id integer primary key autoincrement,
+                sku text not null,
+                quantity integer not null,
+                ordered_by text not null,
+                status text not null default 'AWAITING DELIVERY',
+                ordered_at text not null default (current_timestamp),
+                received_at text
+            );
+                
         """)
 
 

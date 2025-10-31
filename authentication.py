@@ -19,10 +19,14 @@ PERMISSIONS = {
                   'admin_actions',
                   'approve_item_request',
                   'reject_item_request',
+                  'place_order',
+                  'receive_order',
+                  'list_low_stock_items',
+                  'submit_item_request'
                   },
 
-    'Engineer':  {'list_items', 'update_item', 'decrease_stock', 'request_item'},
-    'Warehouse': {'list_items', 'update_item', 'increase_stock', 'request_item'},
+    'Engineer':  {'list_items', 'update_item', 'decrease_stock', 'request_item', 'place_order', 'submit_item_request', 'list_low_stock_items'},
+    'Warehouse': {'list_items', 'update_item', 'increase_stock', 'request_item', 'place_order', 'receive_order', 'submit_item_request', 'list_low_stock_items'}
 }
 
 #Function to hash passwords

@@ -74,6 +74,11 @@ def remove_item(sku):
 
         item_name = item_row['item_name']
 
+        confirmation = input(f"You are about to remove item ({item_name}) from your inventory. Press ENTER to continue or input CANCEL to cancel: ").strip().lower()
+
+        if confirmation == "cancel":
+            return "Successfully cancelled."
+
         with get_connection() as connection:
             cursor = connection.execute("DELETE FROM items WHERE sku = ?", (sku,))
             if cursor.rowcount > 0:
@@ -230,7 +235,9 @@ def list_items():
         for row in rows:
             table.append(f"{row['sku']:<8}   | {row['item_name']:<20} | {row['unit']:<5}     | {row['min_stock']:<3}            | {row['stock']:<5}   |")
 
-        return "\n".join(table)
+        print("\n".join(table))
+        input("\n Press ENTER to continue...")
+
 
     except Exception as e:
         return f"Failed to list items. [ERROR: {e}]"
@@ -260,7 +267,7 @@ def list_low_stock_items():
             table.append(
                 f"{row['sku']:<8}   | "
                 f"{row['item_name']:<20} | "
-                f"{row['unit']:<8} | "
+                f"{row['unit']:<8}  | "
                 f"{row['min_stock']:<5}          | "
                 f"{row['stock']:<5}"
             )
@@ -301,6 +308,85 @@ def submit_item_request(requested_by, item_name = None, sku = None, unit = None,
         return f"Item successfully submitted."
     except Exception as e:
         return f"Failed to submit item. [ERROR: {e}]"
+
+#Place order
+#Available to: ADMIN, WAREHOUSE, ENGINEER
+def place_order(sku, quantity, ordered_by):
+    try:
+        sku = validation_for_integer_input(sku, "SKU")
+        quantity = validation_for_integer_input(quantity, "QUANTITY")
+
+        if quantity <= 0:
+            return "[ERROR] Quantity must be greater than 0."
+
+        with get_connection() as connection:
+            item = connection.execute(
+                "select item_name from items where sku = ?", (sku,)
+            ).fetchone()
+
+            if not item:
+                return f"[ERROR] Item not found with sku: {sku}"
+
+            cursor = connection.execute(
+                "insert into orders (sku, quantity, ordered_by) values (?, ?, ?)", (sku, quantity, ordered_by)
+            )
+
+            order_id = cursor.lastrowid
+
+            return f"SUCCESSFULLY ORDERED: Order ID: #{order_id} Name: '{item['item_name']}' (SKU: {sku}) x{quantity}. Status: Awaiting delivery."
+
+    except Exception as e:
+        return f"Failed to place order. [ERROR: {e}]"
+
+#Receive order
+#Available to: ADMIN, WAREHOUSE
+def receive_order(order_id):
+    try:
+        order_id = validation_for_integer_input(order_id, "ORDER ID")
+
+        with get_connection() as connection:
+
+            row = connection.execute(
+                "SELECT o.order_id, o.sku, o.quantity, o.status, i.item_name, i.stock "
+                "FROM orders o LEFT JOIN items i ON o.sku = i.sku "
+                "WHERE o.order_id = ?", (order_id,)
+            ).fetchone()
+
+            if not row:
+                return f"[ERROR] Order not found with order_id: {order_id}"
+
+            if row["status"] != "Awaiting delivery":
+                return f"[ERROR] ORDER #{order_id} is already {row['status']}."
+
+            if row["item_name"] is None:
+                return f"[ERROR] Item with SKU {row['sku']} does not exist."
+
+            print (f"====ORDER INFO===="
+                   f"\n Order: #{order_id} "
+                   f"\n Name: {row['item_name']} "
+                   f"\n SKU: {row['sku']} "
+                   f"\n Quantity of order: {row['quantity']}"
+                   )
+
+            confirmation = input("Press ENTER to confirm the arrival of this order, else input CANCEL to cancel: ").strip().lower()
+
+            if confirmation == "cancel":
+                return "Successfully cancelled."
+
+            new_stock = int(row["stock"]) + int(row["quantity"])
+
+            connection.execute(
+                "update items set stock = ? where sku = ?", (new_stock, row['sku'])
+            )
+
+            connection.execute(
+                "update orders set status = 'RECEIVED', received_at = current_timestamp where order_id = ?", (order_id,)
+            )
+
+            return f"\nOrder #{order_id} successfully received. Stock has been updated from {row['stock']} to {new_stock}."
+
+    except Exception as e:
+        return f"Failed to receive order. [ERROR: {e}]"
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #==============ADMIN EXCLUSIVE ACTIONS==============#
@@ -490,7 +576,13 @@ def list_requests():
                 return "[ERROR] No requests found."
 
             lines = [
-                "REQ_ID | SKU           | NAME                | UNIT  | MIN | STOCK | BY         | STATUS",
+                "REQ_ID | "
+                "SKU           | "
+                "NAME                 | "
+                "UNIT  | "
+                "MIN | "
+                "STOCK | "
+                "BY         |",
                 "-" * 90
             ]
             for row in rows:
@@ -508,3 +600,84 @@ def list_requests():
     except Exception as e:
         return f"Failed to list requests: [ERROR]: {e}"
 
+
+#==================ORDER ACTIONS====================#
+
+def list_orders():
+    try:
+        with get_connection() as connection:
+            rows = connection.execute(
+                "select order_id, sku, quantity, ordered_by, status, ordered_at, received_at from orders order by order_id desc"
+            ).fetchall()
+
+        if not rows:
+            return "[ERROR] No orders."
+
+        lines = [
+            "ID  | "
+            "SKU        | "
+            "QTY | "
+            "BY         | "
+            "STATUS             | "
+            "ORDERED_AT           | "
+            "RECEIVED_AT",
+            "-" * 95
+        ]
+
+        for row in rows:
+            lines.append(
+                f"{row['order_id']:3} | "
+                f"{str(row['sku']):<10} | "
+                f"{row['quantity']:3} | "
+                f"{row['ordered_by']:<10} | "
+                f"{row['status']:<18} | "
+                f"{row['ordered_at']:<19}  | "
+                f"{str(row['received_at'] or '')}"
+            )
+
+        return "\n".join(lines)
+
+    except Exception as e:
+        return f"Failed to list orders: [ERROR]: {e}"
+
+def delete_order(order_id):
+    try:
+        order_id = validation_for_integer_input(order_id, "ORDER_ID")
+
+        with get_connection() as connection:
+            row = connection.execute(
+                "SELECT order_id, sku, quantity, ordered_by, status, ordered_at, received_at "
+                "FROM orders WHERE order_id = ?",
+                (order_id,)
+            ).fetchone()
+
+        if not row:
+            return f"[INFO] No such order (#{order_id})."
+
+        # Show the order details
+        print("\n--- ORDER DETAILS ---")
+        print(f"ID:         {row['order_id']}")
+        print(f"SKU:        {row['sku']}")
+        print(f"Quantity:   {row['quantity']}")
+        print(f"Ordered by: {row['ordered_by']}")
+        print(f"Status:     {row['status']}")
+        print(f"Ordered at: {row['ordered_at']}")
+        print(f"Received at:{row['received_at'] if row['received_at'] else ''}")
+
+        confirm = input("\nPress ENTER to delete this order, or type 'cancel' to cancel: ").strip().lower()
+        if confirm == "cancel":
+            return "Deletion successfully cancelled."
+
+        with get_connection() as connection:
+            cur = connection.execute(
+                "DELETE FROM orders WHERE order_id = ?",
+                (order_id,)
+            )
+
+            if cur.rowcount and cur.rowcount > 0:
+                return f"Order #{order_id} successfully deleted."
+            else:
+                return f"There was an error in deleting this order. It may not exist"
+
+    except Exception as e:
+        return f"[ERROR] Failed to delete order: {e}"

@@ -3,15 +3,25 @@ from inventory_services import (
     list_items,
     remove_item,
     update_item,
+
     decrease_stock,
     increase_stock,
+
     create_new_user,
     delete_existing_user,
     list_user_information,
+
     submit_item_request,
     approve_item_request,
     reject_item_request,
-    list_requests
+    list_requests,
+
+    list_low_stock_items,
+
+    place_order,
+    receive_order,
+    list_orders,
+    delete_order,
 
 )
 
@@ -29,6 +39,9 @@ def main_menu(user):
         print("4) Decrease item stock")
         print("5) Submit item request")
         print("6) View Low Stock items")
+        print("7) Place Order")
+        print("8) Receive Order")
+
 
         print("9) Admin actions")
         print("0) Log out")
@@ -41,7 +54,7 @@ def main_menu(user):
             if not permission_checker(user, "list_items"):
                 print("You do not have permission to do this.")
                 continue
-            print(list_items())
+            list_items()
 
         #Update items
         elif choice == "2":
@@ -82,7 +95,7 @@ def main_menu(user):
         #Submit Item Request
         elif choice == "5":
             #Check permissions
-            if not permission_checker(user, "list_items"):
+            if not permission_checker(user, "submit_item_request"):
                 print("You do not have permission to do this.")
                 continue
             #Submit Item request
@@ -98,12 +111,36 @@ def main_menu(user):
         #Check low stock items
         elif choice == "6":
             #Check permissions
-            if not permission_checker(user, "list_items"):
+            if not permission_checker(user, "list_low_stock_items"):
                 print("You do not have permission to do this.")
                 continue
             #Return list of low stock items
+            print(list_low_stock_items())
+            input("\nPress ENTER to continue...")
 
+        #Place order
+        elif choice == "7":
+            #Check permissions
+            if not permission_checker(user, "place_order"):
+                print("You do not have permission to do this.")
+                continue
 
+            #Place order
+            sku = input("SKU of item being ordered: ").strip()
+            quantity = input("Quantity of stock being ordered: ").strip() or None
+            ordered_by = user["username"]
+            print(place_order(sku, quantity, ordered_by))
+
+        #Receive order
+        elif choice == "8":
+            #Check permissions
+            if not permission_checker(user, "receive_order"):
+                print("You do not have permission to do this.")
+                continue
+
+            #Receive order
+            order_id = input("Order ID: ").strip()
+            print(receive_order(order_id))
 
         #Admin exclusive actions
         elif choice == "9":
@@ -132,21 +169,20 @@ def main_menu(user):
 def admin_exclusive_menu():
     while True:
         print("\n=====ADMIN MANAGEMENT=====")
-        print("1) Manage users")
-        print("2) Add item")
-        print("3) Remove item")
+
+        print("1) Add item")
+        print("2) Remove item")
+        print("3) Manage users")
         print("4) Manage requests")
+        print("5) Manage orders")
 
         print("0) Back")
 
         choice = input("Enter your choice: ").strip()
 
-        #Manage users
-        if choice == "1":
-            user_management_menu()
 
         #Add items
-        elif choice == "2":
+        if choice == "1":
             # Add item
             sku = input("SKU: ").strip()
             name = input("Name: ").strip()
@@ -156,14 +192,22 @@ def admin_exclusive_menu():
             print(add_item(sku, name, unit, min_level, stock))
 
         #Remove items
-        elif choice == "3":
+        elif choice == "2":
             # Remove item
             sku = input("SKU to remove: ").strip()
             print(remove_item(sku))
 
+        #Manage users
+        elif choice == "3":
+            user_management_menu()
+
         #Manage Requests
         elif choice == "4":
             request_management_menu()
+
+        #Manage orders
+        elif choice == "5":
+            order_management_menu()
 
         #Back
         elif choice == "0":
@@ -236,6 +280,7 @@ def request_management_menu():
         elif choice == "3":
             #List all user info
             print(list_requests())
+            input("\n Press ENTER to continue...")
 
         #Back
         elif choice == "0":
@@ -243,5 +288,31 @@ def request_management_menu():
             return
 
         #Failsafe
+        else:
+            print("Invalid choice. Please pick the number corresponding to your desired action.")
+
+#Seperate menu system to manage orders
+def order_management_menu():
+    while True:
+        print("\n=====MANAGE REQUESTS=====")
+        print("1) List orders")
+        print("2) Delete order")
+
+        print("0) Back ")
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            print(list_orders())
+            input("\n Press ENTER to continue...")
+
+        elif choice == "2":
+            order_id = input("Order ID of order to delete: ").strip()
+            delete_order(order_id)
+
+        elif choice == "0":
+            print("\nReturning to Admin Menu...")
+            return
+
+        # Failsafe
         else:
             print("Invalid choice. Please pick the number corresponding to your desired action.")

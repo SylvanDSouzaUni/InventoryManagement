@@ -16,11 +16,13 @@ PERMISSIONS = {
                   'increase_stock',
                   'manage_users',
                   'list_user_information',
-                  'admin_actions'
+                  'admin_actions',
+                  'approve_item_request',
+                  'reject_item_request',
                   },
 
-    'Engineer':  {'list_items', 'update_item', 'decrease_stock'},
-    'Warehouse': {'list_items', 'update_item', 'increase_stock'},
+    'Engineer':  {'list_items', 'update_item', 'decrease_stock', 'request_item'},
+    'Warehouse': {'list_items', 'update_item', 'increase_stock', 'request_item'},
 }
 
 #Function to hash passwords
@@ -85,7 +87,7 @@ def login():
     password = input("Password: ").strip()
     with get_connection() as conn:
         row = conn.execute(
-            "SELECT id, username, password_hash, role FROM users WHERE username=?",
+            "SELECT username, password_hash, role FROM users WHERE username=?",
             (username,)
         ).fetchone()
     if not row:
@@ -94,7 +96,7 @@ def login():
     if not check_password(password, row["password_hash"]):
         print("Incorrect password.")
         return None
-    return {"id": row["id"], "username": row["username"], "role": row["role"]}
+    return {"username": row["username"], "role": row["role"]}
 
 #Function to check if a user is allowed to complete a certain action.
 def permission_checker(user, action):

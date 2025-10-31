@@ -7,7 +7,12 @@ from inventory_services import (
     increase_stock,
     create_new_user,
     delete_existing_user,
-    list_user_information
+    list_user_information,
+    submit_item_request,
+    approve_item_request,
+    reject_item_request,
+    list_requests
+
 )
 
 from authentication import permission_checker
@@ -16,11 +21,14 @@ from authentication import permission_checker
 def main_menu(user):
     print("=== Welcome to the Inventory System ===")
     while True:
-        print("\nChoose an option:")
+        print("\n=====MAIN MENU=====")
+        print("Choose an option:")
         print("1) List items")
         print("2) Update item")
         print("3) Increase item stock")
         print("4) Decrease item stock")
+        print("5) Submit item request")
+        print("6) View Low Stock items")
 
         print("9) Admin actions")
         print("0) Log out")
@@ -58,8 +66,7 @@ def main_menu(user):
             #Increase the stock by desired amount
             sku = input("SKU to increase: ").strip()
             num = input("Number of stock to increase by: ").strip()
-            current_stock = input("Current stock (blank = unchanged): ").strip()
-            print(increase_stock(sku, num, current_stock))
+            print(increase_stock(sku, num))
 
         #Decrease stock
         elif choice == "4":
@@ -70,8 +77,33 @@ def main_menu(user):
             #Decrease the stock by desired amount
             sku = input("SKU to decrease: ").strip()
             num = input("Number of stock to decrease by: ").strip()
-            current_stock = input("Current stock (blank = unchanged): ").strip()
-            print(decrease_stock(sku, num, current_stock))
+            print(decrease_stock(sku, num))
+
+        #Submit Item Request
+        elif choice == "5":
+            #Check permissions
+            if not permission_checker(user, "list_items"):
+                print("You do not have permission to do this.")
+                continue
+            #Submit Item request
+            sku = input("SKU to list: ").strip()
+            name = input("Name: ").strip() or None
+            unit = input("Unit: ").strip() or None
+            stock = input("Stock: ").strip() or None
+            min_stock = input("Minimum Stock: ").strip() or None
+            requested_by = user["username"]
+
+            print(submit_item_request(requested_by, name, sku, unit, min_stock, stock))
+
+        #Check low stock items
+        elif choice == "6":
+            #Check permissions
+            if not permission_checker(user, "list_items"):
+                print("You do not have permission to do this.")
+                continue
+            #Return list of low stock items
+
+
 
         #Admin exclusive actions
         elif choice == "9":
@@ -103,6 +135,7 @@ def admin_exclusive_menu():
         print("1) Manage users")
         print("2) Add item")
         print("3) Remove item")
+        print("4) Manage requests")
 
         print("0) Back")
 
@@ -128,6 +161,10 @@ def admin_exclusive_menu():
             sku = input("SKU to remove: ").strip()
             print(remove_item(sku))
 
+        #Manage Requests
+        elif choice == "4":
+            request_management_menu()
+
         #Back
         elif choice == "0":
             print("\nReturning to Main Menu...")
@@ -144,6 +181,7 @@ def user_management_menu():
         print("1) Create user")
         print("2) Delete user")
         print("3) List user information")
+
         print("0) Back ")
         choice = input("Enter your choice: ").strip()
 
@@ -163,6 +201,41 @@ def user_management_menu():
         elif choice == "3":
             #List all user info
             list_user_information()
+
+        #Back
+        elif choice == "0":
+            print("\nReturning to Admin Menu...")
+            return
+
+        #Failsafe
+        else:
+            print("Invalid choice. Please pick the number corresponding to your desired action.")
+
+#Seperate menu system for admin to handle requests
+def request_management_menu():
+    while True:
+        print("\n=====MANAGE REQUESTS=====")
+        print("1) Approve request")
+        print("2) Reject request")
+        print("3) List requests")
+
+        print("0) Back ")
+        choice = input("Enter your choice: ").strip()
+
+        #Add user to table
+        if choice == "1":
+            id = input("Request ID of request to approve: ").strip()
+            print(approve_item_request(id))
+
+        #Remove user from table
+        elif choice == "2":
+            id = input("Request ID of request to reject: ").strip()
+            print(reject_item_request(id))
+
+        #List user info
+        elif choice == "3":
+            #List all user info
+            print(list_requests())
 
         #Back
         elif choice == "0":

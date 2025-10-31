@@ -16,12 +16,31 @@ def get_connection():
 def create_schema():
     with get_connection() as connection:
         connection.executescript("""
+            
             create table if not exists users (
-            id integer primary key autoincrement,
             username text not null unique,
             password_hash text not null,
             role text not null check (role IN ('Admin', 'Engineer', 'Warehouse'))
                 );
+                
+            create table if not exists items (
+                sku text not null unique,
+                item_name text not null,
+                unit text not null default 'each',
+                min_stock integer not null default 0,
+                stock integer not null default 0
+            );
+                
+            create table if not exists requests (
+                request_id integer primary key autoincrement,
+                sku text,
+                item_name text,
+                unit text default 'each',
+                min_stock integer default 0,
+                stock integer default 0,
+                requested_by text not null 
+            );
+                
         """)
 
 

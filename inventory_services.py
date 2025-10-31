@@ -228,7 +228,7 @@ def list_items():
             rows = connection.execute(f"select * from items").fetchall()
 
         if not rows:
-            return f"No items found."
+            print(f"No items found.")
 
         table = ["SKU        | NAME                 | UNIT      | MINIMUM STOCK  | STOCK   |" , "-" * 81]
 
@@ -240,7 +240,7 @@ def list_items():
 
 
     except Exception as e:
-        return f"Failed to list items. [ERROR: {e}]"
+        print(f"Failed to list items. [ERROR: {e}]")
 
 #List low stock items
 #Available to: ADMIN, WAREHOUSE
@@ -404,7 +404,7 @@ def list_user_information():
             ).fetchall()
 
         if not rows:
-            return "[ERROR] No users found"
+            print( "[ERROR] No users found")
 
         table = []
         table.append("USERNAME       | ROLE       | PASSWORD HASH")
@@ -415,7 +415,7 @@ def list_user_information():
         input("\nPress ENTER to continue")
 
     except Exception as e:
-        return f"Failed to list users: {e}"
+        print(f"Failed to list users: {e}")
 
 #Create a new user to add to the user table
 def create_new_user(username, password, role):

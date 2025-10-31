@@ -12,7 +12,7 @@ def main_loop():
         user = None
         while not user:
             user = login()
-        
+
         current_status = main_menu(user)
 
         if current_status == "logged out":

@@ -31,12 +31,14 @@ WAREHOUSE:
 2) update_item
 3) increase_stock
 4) request_item
+5) submit_item_request
 
 ENGINEER:
 1) list_items
 2) update_item
 3) decrease_stock
 4) request_item
+5) submit_item_request
 
 When running this program, one admin account will be created as the first account.
 The credentials are mentioned in the console apon creation. They are as follows:

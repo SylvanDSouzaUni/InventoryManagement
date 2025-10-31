@@ -1,48 +1,28 @@
-Version 1.3
+Version 1.4
 
+This version marks the end of the project.
+In this version, order functionality was added.
+Warehouse and Engineers can place orders for items by specifying item sku.
+These orders can be viewed by admin, who has the ability to delete them.
+Once an order arrives, warehouse are able to notify the program through the receive_order function. This function will automatically increase the stock of this item in the item table. 
+Orders are timestamped with order time and order received time. Orders can exist in one of two states: AWAITING DELIVERY, RECEIVED.
 
-This version has introduced a significant amount of functionality. This functionality will be outlined as a list below:
+Finally, all roles have access to list_low_stock which lists any items where stock is less than minimum_stock. 
 
-1) Database Functionality:
-Add item, remove item, update item, increase stock, decrease stock and  list items have been improved to include database functionality. This means that these functions no longer return strings outlining if the call of the funciton was successful or not, they actually commit changes to a database which stores items. This means, with this version, admins can create items and handle them in a   database which stores them.
+As this is the final version of this project. A more comprehensive program use guide is outlined below.
 
-2) Item Request Functionality:
-Warehouse workers and Engineers can now submit requests for new items. These requests will exist in a requests table which the admin can see. Admin can approve of requests, which will add the requested item and its fields to the items table. Admin can also reject requests which will remove them from the requests table.  When submitting a request, engineers can enter any values for the fields of the item (no validation). Apon aproval, these fields will be validated to ensure they are safe to add to the original items table.
+To start the program, run main.py.
+Apon running main,py, the console will display a prompt to enter username. If this is the first time running the program on your device, a default admin account will be created for you. The credentials for this account are as follows:
+Username: Admin
+Password: Admin123
+You can log in with these credentials.
 
- 3) Item Request Approval Functionality (ADMIN):
-Admin now has a "manage requests" option in the admin menu. This allows admins to view, approve and reject requests. Apon aproval, admin will be asked if they would like to change any fields of the item (stock, minimum stock, name, sku, etc) before approval. If no, item fields will be validated. If there are any errors, the admin will be prompted to change item field values to adhere to database standards. If admin chooses to change any values before approval, this will be allowed. Items requests which are approved will be added to the items table and removed from the requests table. Items requests which are rejected will be removed from the requests table.
+After logging in, You will be greeted with the main menu.
+This main menu presents a numbered list of action options.
+You may enter the number corresponding to your desired action in order to run that action.
 
-The permissions of each role are outlined below:
-ADMIN:
-1) list_items
-2) add_item
-3) update_item
-4) remove_item
-5) decrease_stock
-6) increase_stock
-7) manage_users
-8) list_user_information
-9) admin_actions
-10) approve_item_request
-11) reject_item_request
+Any further input required will be prompted similiarly.
 
-WAREHOUSE:
-1) list_items
-2) update_item
-3) increase_stock
-4) request_item
-5) submit_item_request
+If you are on an admin account, you will have access to the admin exclusive actions. Here, you can create multiple user accounts with different roles. Apon creation of these user accounts, you can navigate back to the main menu where you have the option to log out. 'Log out' does NOT do the same as 'exit'. 'Exit' will end the entire program, 'log out' will return you back to the log in portion of the program where you are able to log back in with any other user account.
+Feel free to experiement with user access levels for different actions using different user accounts.
 
-ENGINEER:
-1) list_items
-2) update_item
-3) decrease_stock
-4) request_item
-5) submit_item_request
-
-When running this program, one admin account will be created as the first account.
-The credentials are mentioned in the console apon creation. They are as follows:
-Username: admin
-Password: admin123
-After logging in, the main menu will work as earlier. 
-GUI is intuiative and user-friendly. You will be prompted for inputs in a clear manner, hence navigation is not neccesary to outline here.

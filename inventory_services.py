@@ -355,7 +355,7 @@ def receive_order(order_id):
             if not row:
                 return f"[ERROR] Order not found with order_id: {order_id}"
 
-            if row["status"] != "Awaiting delivery":
+            if row["status"] != "AWAITING DELIVERY":
                 return f"[ERROR] ORDER #{order_id} is already {row['status']}."
 
             if row["item_name"] is None:
@@ -558,7 +558,7 @@ def reject_item_request(request_id):
             )
 
         if cursor.rowcount > 0:
-            return f"[CANCEL] Request has been rejected."
+            return f"Request has been rejected."
         else:
             return f"[ERROR] Request does not exist."
 
